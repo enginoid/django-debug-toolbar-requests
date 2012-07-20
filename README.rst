@@ -24,3 +24,5 @@ Add the following lines to your ``settings.py``::
    )
 
 An extra panel titled "HTTP Requests" should appear in your debug toolbar.
+
+.. note:: There's literally no useful functionality in this app right now.
