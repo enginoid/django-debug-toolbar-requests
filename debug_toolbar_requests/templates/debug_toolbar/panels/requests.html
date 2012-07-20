@@ -1,26 +1,53 @@
 {% load i18n %}
-{{ requests }}
 
-<h4>{% trans 'Requests' %}</h4>
+{% for response_timer in response_timers %}
+{% with response_timer.response as response %}
+<h4>{{ response.request.url }}
+    ({{ response_timer.duration.milliseconds }} {% trans 'ms' %})</h4>
+
+<h5>{% trans "Request" %}</h5>
 <table>
+    <colgroup>
+        <col style="width:15%"/>
+        <col/>
+    </colgroup>
     <thead>
-        <tr>
-            <th>{% trans 'Method' %}</th>
-            <th>{% trans 'URL' %}</th>
-            <th>{% trans 'Status code' %}</th>
-            <th>{% trans 'Time (ms)' %}</th>
-        </tr>
+    <tr>
+        <th>{% trans "Key" %}</th>
+        <th>{% trans "Value" %}</th>
+    </tr>
     </thead>
     <tbody>
-    {% for response_timer in response_timers %}
-        {% with response_timer.response as response %}
         <tr>
+            <td>{% trans "Method" %}</td>
             <td>{{ response.request.method }}</td>
-            <td>{{ response.request.url }}</td>
-            <td>{{ response.status_code }}</td>
-            <td>{{ response_timer.duration.milliseconds }}</td>
         </tr>
-        {% endwith %}
-    {% endfor %}
+        <tr>
+            <td>{% trans "URL" %}</td>
+            <td>{{ response.request.url }}</td>
+        </tr>
     </tbody>
 </table>
+
+<h5>{% trans "Response" %}</h5>
+<table>
+    <colgroup>
+        <col style="width:15%"/>
+        <col/>
+    </colgroup>
+    <thead>
+    <tr>
+        <th>{% trans "Key" %}</th>
+        <th>{% trans "Value" %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>{% trans "Status" %}</td>
+        <td>{{ response.status_code }}</td>
+    </tr>
+    </tbody>
+</table>
+
+{% endwith %}
+{% endfor %}
