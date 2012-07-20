@@ -7,20 +7,10 @@ import requests
 from django.utils.translation import ugettext_lazy as _, ngettext
 
 from debug_toolbar.panels import DebugPanel
-from debug_toolbar_requests.utils import timedelta_with_milliseconds
-
-class ResponseTimer(object):
-    def __init__(self, start_time=None, end_time=None, response=None):
-        self.start_time = start_time
-        self.end_time = end_time
-        self.response = response
-
-    @property
-    def duration(self):
-        seconds = self.end_time - self.start_time
-        return timedelta_with_milliseconds(seconds=seconds)
 
 # Retain, because it won't be retrievable after monkey-patching.
+from debug_toolbar_requests.models import ResponseTimer
+
 original_thread_class = requests.models.Request
 
 class RequestsDebugPanel(DebugPanel):
