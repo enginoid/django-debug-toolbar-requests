@@ -1,3 +1,4 @@
+from datetime import timedelta
 from functools import partial
 from threading import local
 import time
@@ -8,6 +9,10 @@ from django.utils.translation import ugettext_lazy as _, ngettext
 
 from debug_toolbar.panels import DebugPanel
 
+class timedelta(timedelta):
+    def milliseconds(self):
+        return int(round(self.microseconds / 1000.0))
+
 class ResponseTimer(object):
     def __init__(self, start_time=None, end_time=None, response=None):
         self.start_time = start_time
@@ -16,7 +21,8 @@ class ResponseTimer(object):
 
     @property
     def duration(self):
-        return self.end_time - self.start_time
+        seconds = self.end_time - self.start_time
+        return timedelta(seconds=seconds)
 
 # Retain, because it won't be retrievable after monkey-patching.
 original_thread_class = requests.models.Request

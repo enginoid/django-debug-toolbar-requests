@@ -8,7 +8,7 @@
             <th>{% trans 'Method' %}</th>
             <th>{% trans 'URL' %}</th>
             <th>{% trans 'Status code' %}</th>
-            <th>{% trans 'Duration' %}</th>
+            <th>{% trans 'Time (ms)' %}</th>
         </tr>
     </thead>
     <tbody>
@@ -18,7 +18,7 @@
             <td>{{ response.request.method }}</td>
             <td>{{ response.request.url }}</td>
             <td>{{ response.status_code }}</td>
-            <td>{{ response_timer.duration }}{% trans 's' %}</td>
+            <td>{{ response_timer.duration.milliseconds }}</td>
         </tr>
         {% endwith %}
     {% endfor %}
