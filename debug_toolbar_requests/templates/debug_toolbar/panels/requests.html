@@ -4,19 +4,23 @@
 <h4>{% trans 'Requests' %}</h4>
 <table>
     <thead>
-    <tr>
-        <th>{% trans 'Method' %}</th>
-        <th>{% trans 'URL' %}</th>
-        <th>{% trans 'Status code' %}</th>
-    </tr>
+        <tr>
+            <th>{% trans 'Method' %}</th>
+            <th>{% trans 'URL' %}</th>
+            <th>{% trans 'Status code' %}</th>
+            <th>{% trans 'Duration' %}</th>
+        </tr>
     </thead>
     <tbody>
-    {% for response in responses %}
+    {% for response_timer in response_timers %}
+        {% with response_timer.response as response %}
         <tr>
             <td>{{ response.request.method }}</td>
             <td>{{ response.request.url }}</td>
             <td>{{ response.status_code }}</td>
+            <td>{{ response_timer.duration }}{% trans 's' %}</td>
         </tr>
+        {% endwith %}
     {% endfor %}
     </tbody>
 </table>
