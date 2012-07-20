@@ -1,2 +1,22 @@
 {% load i18n %}
-<p>{% trans "This middleware is not implemented at all!" %}</p>
+{{ requests }}
+
+<h4>{% trans 'Requests' %}</h4>
+<table>
+    <thead>
+    <tr>
+        <th>{% trans 'Method' %}</th>
+        <th>{% trans 'URL' %}</th>
+        <th>{% trans 'Status code' %}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for response in responses %}
+        <tr>
+            <td>{{ response.request.method }}</td>
+            <td>{{ response.request.url }}</td>
+            <td>{{ response.status_code }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='django-debug-toolbar-requests',
-    version='0.0.1',
+    version='0.0.2',
     description=('A django-debug-toolbar panel for HTTP requests made with '
         'the `requests` library.'),
     long_description=open('README.rst').read(),
