@@ -1,53 +1,14 @@
 {% load i18n %}
 
 {% for response_timer in response_timers %}
-{% with response_timer.response as response %}
-<h4>{{ response.request.url }}
-    ({{ response_timer.duration.milliseconds }} {% trans 'ms' %})</h4>
+    <h4>{{ response_timer.request.url }}
+        ({{ response_timer.duration.milliseconds }} {% trans 'ms' %})</h4>
 
-<h5>{% trans "Request" %}</h5>
-<table>
-    <colgroup>
-        <col style="width:15%"/>
-        <col/>
-    </colgroup>
-    <thead>
-    <tr>
-        <th>{% trans "Key" %}</th>
-        <th>{% trans "Value" %}</th>
-    </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>{% trans "Method" %}</td>
-            <td>{{ response.request.method }}</td>
-        </tr>
-        <tr>
-            <td>{% trans "URL" %}</td>
-            <td>{{ response.request.url }}</td>
-        </tr>
-    </tbody>
-</table>
+    {% with 'debug_toolbar/panels/snippets/key_value_table.html' as key_value_template %}
+        <h5>{% trans "Response" %}</h5>
+        {% include key_value_template with items=response_timer.response.template_items %}
 
-<h5>{% trans "Response" %}</h5>
-<table>
-    <colgroup>
-        <col style="width:15%"/>
-        <col/>
-    </colgroup>
-    <thead>
-    <tr>
-        <th>{% trans "Key" %}</th>
-        <th>{% trans "Value" %}</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-        <td>{% trans "Status" %}</td>
-        <td>{{ response.status_code }}</td>
-    </tr>
-    </tbody>
-</table>
-
-{% endwith %}
+        <h5>{% trans "Request" %}</h5>
+        {% include key_value_template with items=response_timer.request.template_items %}
+    {% endwith %}
 {% endfor %}

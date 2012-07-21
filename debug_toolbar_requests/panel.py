@@ -1,10 +1,12 @@
 from functools import partial
+from pprint import pformat
 from threading import local
 import time
 
 import requests
 
 from django.utils.translation import ugettext_lazy as _, ngettext
+from django.template.defaultfilters import truncatechars
 
 from debug_toolbar.panels import DebugPanel
 
@@ -71,8 +73,33 @@ class RequestsDebugPanel(DebugPanel):
     def url(self):
         return ''
 
-    def process_response(self, request, response):
+    def process_response(self, _request, _response):  # unused params
+        response_timers = self.thread_locals.response_timers
+        for response_timer in response_timers:
+            # Tack template-specific information on to the response timer
+            # objects to save some boilerplate in the template.
+            response = response_timer.response
+            response_timer.response.template_items = (
+                (_("URL"), response.url),
+                (_("Status"), u"{code} {reason}".format(
+                    code=response.status_code, reason=response.reason)),
+                (_("Headers"), pformat(response.headers)),
+                (_("Body"), truncatechars(response.text, 1024)),
+            )
+
+            request = response_timer.request
+            response_timer.request.template_items = (
+                (_("URL"), request.url),
+                (_("Method"), request.method),
+                (_("Headers"), pformat(request.headers)),
+                (_("Parameters"), request.params),
+
+                # TODO: it would be nice to get the actual raw body
+                (_("Data"), request.data),
+                (_("Files"), request.files),
+            )
+
         self.record_stats({
-            'response_timers': self.thread_locals.response_timers,
+            'response_timers': response_timers,
         })
 
