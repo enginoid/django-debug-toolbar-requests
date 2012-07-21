@@ -26,12 +26,10 @@ class RequestsDebugPanel(DebugPanel):
     has_content = True
 
     def receive_response(self, index, response):
-        print 'response', index
         self.thread_locals.response_timers[index].end_time = time.time()
         self.thread_locals.response_timers[index].response = response
 
     def receive_request(self, index, request):
-        print 'request', index
         self.thread_locals.response_timers[index].start_time = time.time()
 
     def __init__(self, *args, **kwargs):
