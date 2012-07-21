@@ -24,3 +24,8 @@ Add the following lines to your ``settings.py``::
    )
 
 An extra panel titled "HTTP Requests" should appear in your debug toolbar.
+
+Screenshot
+==========
+
+.. image:: https://raw.github.com/enginous/django-debug-toolbar-requests/master/docs/images/screenshots/main.png
