@@ -1,14 +1,50 @@
 {% load i18n %}
 
 {% for response_timer in response_timers %}
-    <h4>{{ response_timer.request.url }}
+{% with response_timer.request as request %}
+{% with response_timer.response as response %}
+
+    <h4>{{ request.url }}
         ({{ response_timer.duration.milliseconds }} {% trans 'ms' %})</h4>
 
     {% with 'debug_toolbar/panels/snippets/key_value_table.html' as key_value_template %}
         <h5>{% trans "Response" %}</h5>
-        {% include key_value_template with items=response_timer.response.template_items %}
+        {% include key_value_template with items=response.template_items %}
 
         <h5>{% trans "Request" %}</h5>
-        {% include key_value_template with items=response_timer.request.template_items %}
+        {% include key_value_template with items=request.template_items %}
+
+        <h5>{% trans "Actions" %}</h5>
+        {% if request.is_browser_repeatable %}
+        <form action="{{ request.full_url }}" method="{{ request.method }}"
+            {% if request.files %}enctype="multipart/form-data"{% endif %}>
+
+            {% for name, value in request.data.items %}
+            <input type="hidden" name="{{ name }}" value="{{ value }}" />
+            {% endfor %}
+
+            {% for name, value in request.files.items %}
+                <input type="hidden" name="{{ name }}" value="{{ value }}" />
+            {% endfor %}
+
+            <button type="submit">{% trans "Perform request (in browser)" %}</button>
+        </form>
+        {% else %}
+        {# TODO: perhaps only display this if toolbar debug is on #}
+        <div>
+            <p>{% trans "Can't repeat request in browser." %}
+               {% trans "Conditions not satisifed:" %}</p>
+            <ul>
+                {% for condition_name, is_satisfied in request.browser_repeatability_conditions.items %}
+                {% if not is_satisfied %}
+                <li>{{ condition_name }}</li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
     {% endwith %}
+
+{% endwith %}
+{% endwith %}
 {% endfor %}

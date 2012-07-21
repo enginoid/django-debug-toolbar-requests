@@ -4,6 +4,7 @@ from threading import local
 import time
 
 import requests
+import requests.defaults
 
 from django.utils.translation import ugettext_lazy as _, ngettext
 from django.template.defaultfilters import truncatechars
@@ -97,6 +98,82 @@ class RequestsDebugPanel(DebugPanel):
                 # TODO: it would be nice to get the actual raw body
                 (_("Data"), request.data),
                 (_("Files"), request.files),
+            )
+
+            # TODO: this desperately needs tests
+            # TODO: the browser replay functionality calls for extraction
+            #   into its own module.
+            def check_browser_compatible_headers(request):
+                # We only have access to the resulting headers.  To verify
+                # that the standard `requests` headers are being sent (which
+                # themselves are browser-compatible), we check that the
+                # headers sent are exactly equivalent to the default headers
+                # sent by `requests`.
+
+                # As an exception, we can also support a request if it only
+                # adds a `Content-Type` header to the defaults sent by
+                # `requests`.  However, we only support that header if it
+                # contains one of the two encodings supported by HTML4.
+                browser_supported_enctypes = (
+                    # automatically sent by browser for every POST form
+                    'application/x-www-form-urlencoded',
+
+                    # sent by POST forms with `enctype` set to this
+                    'multipart/form-data'
+                )
+
+                headers = request.headers.copy()  # don't corrupt the original
+                header_name = 'Content-Type'
+                content_type_header = headers.get(header_name, '')
+                for enctype in browser_supported_enctypes:
+                    # `startswith` is used because we might have a trailing
+                    # semicolon: multipart/form-data; boundary=foobar
+                    if content_type_header.startswith(enctype):
+                        # TODO: need much safer parsing for this, find header lib
+                        # TODO: also matches 'multipart/form-data-foo`
+                        # TODO: messy
+                        del headers[header_name]
+
+                return headers == requests.defaults.defaults['base_headers']
+
+            # The template displays a button in-browser allowing the user to
+            # repeat the call.  Because this is done through a form, we cannot
+            # allow this for some more complex requests.  Multiple conditions
+            # are required to determine this, and they are kept in a dict
+            # instead of a serial condition for traceability (for debugging,
+            # or to show why request can't be displayed in the template).
+            response_timer.request.browser_repeatability_conditions = dict(
+                is_get_or_post = request.method in ('GET', 'POST'),
+
+                # The browser can't send its own headers. We must ensure
+                # that the headers sent only use headers that won't make
+                # the meaning of the request semantically different, or
+                # headers that we can support using forms (e.g. 'enctype'
+                # can emulate some values of  the'Content-Type' header.)
+                has_browser_compatible_headers = check_browser_compatible_headers(request),
+
+                # Can't repeat GET requests with anything in the body.  The
+                # browser will just tack it on to the URL instead of using
+                # a GET body.  (Not that GET bodies have semantic meaning in
+                # HTTP, but people still do strange things.)
+                is_not_get_with_body = any((
+                    (request.method == 'POST'),
+                    ((not request.data) and (not request.files)),
+                )),
+
+                # In POST requests, you can send multipart and non-multipart
+                # data separately.  Once browser forms have an encoding of
+                # `multipart/form-data`, however, every parameter will be
+                # sent as multipart data.
+                is_not_data_and_files = not (request.data and request.files),
+
+                # For POST bodies, the browser only do key-value bodies and
+                # not other payloads, such as strings.
+                is_key_value_body = isinstance(request.data, dict),
+            )
+
+            response_timer.request.is_browser_repeatable = all(
+                response_timer.request.browser_repeatability_conditions.values()
             )
 
         self.record_stats({
