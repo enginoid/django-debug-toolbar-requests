@@ -16,6 +16,13 @@
 
         <h5>{% trans "Actions" %}</h5>
         {% if request.is_browser_repeatable %}
+        <p>
+            {% blocktrans %}
+            This functionality is heavily under-tested.  Please be very
+            suspect of this code not accurately replaying requests, but
+            please do file a bug if that happens.
+            {% endblocktrans %}
+        </p>
         <form action="{{ request.full_url }}" method="{{ request.method }}"
             {% if request.files %}enctype="multipart/form-data"{% endif %}>
 
@@ -27,7 +34,7 @@
                 <input type="hidden" name="{{ name }}" value="{{ value }}" />
             {% endfor %}
 
-            <button type="submit">{% trans "Perform request (in browser)" %}</button>
+            <button type="submit">{% trans "Replay request (in browser)" %}</button>
         </form>
         {% else %}
         {# TODO: perhaps only display this if toolbar debug is on #}
